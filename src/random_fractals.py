@@ -98,18 +98,17 @@ def random_fractal(
         fractal = np.ma.masked_where(fractal == 0, fractal)
         if fractal.std() > minvar:
             print(i, fractal.std())
-            break
-    fractal, x, y = make_fractal_r0(
-        c,
-        max_iter=max_iter,
-        x0=x0,
-        y0=y0,
-        pixelwidth=pixelwidth,
-        resx=resx,
-        resy=resy,
-        method=method,
-    )
+            fractal, x, y = make_fractal_r0(
+                c,
+                max_iter=max_iter,
+                x0=x0,
+                y0=y0,
+                pixelwidth=pixelwidth,
+                resx=resx,
+                resy=resy,
+                method=method,
+            )
     # print(np.diff(x), np.diff(y))
-    out_to_image_cmap(fractal, cmap=cmap, impath=impath)
-    if plot:
-        plot_fractal(x, y, fractal, cmap)
+            out_to_image_cmap(fractal, cmap=cmap, impath=impath)
+            if plot:
+                plot_fractal(x, y, fractal, cmap)
