@@ -47,7 +47,7 @@ def out_to_image_cmap(out, cmap="plasma", impath=IMG_PATH):
     img.save(impath)
 
 
-def random_julia_bw_far(resx=3440, resy=1440, max_iter=1000):
+def random_julia_far(resx=3440, resy=1440, max_iter=1000, cmap="gray"):
     c = 2 * ((0.5 - np.random.rand()) + 1j * (0.5 - np.random.rand()))
     print(c)
     ylim = -2, 2
@@ -55,7 +55,7 @@ def random_julia_bw_far(resx=3440, resy=1440, max_iter=1000):
     dy = y[1] - y[0]
     x = np.linspace(-dy * (resx - 1) / 2, dy * (resx - 1) / 2, resx)
     fractal = mb.fractals.julia(x, y, c, max_iter)
-    out_to_image_cmap(fractal, "gray")
+    out_to_image_cmap(fractal, cmap=cmap)
 
 
 def make_julia_r0(c, max_iter, x0, y0, pixelwidth, resx=500, resy=500):
@@ -69,7 +69,7 @@ def make_julia_r0(c, max_iter, x0, y0, pixelwidth, resx=500, resy=500):
     return fractal, x, y
 
 
-def random_julia_bw(
+def random_julia(
     resx=3440, resy=1440, max_iter=1000, cmap="plasma", minvar=10, plot=False
 ):
     var = 0
@@ -88,46 +88,12 @@ def random_julia_bw(
         )
         fractal = np.ma.masked_where(fractal == 0, fractal)
         if fractal.var() > minvar:
-            print(i)
+            print(i, fractal.var())
             break
     fractal, x, y = make_julia_r0(
         c, max_iter=max_iter, x0=x0, y0=y0, pixelwidth=pixelwidth, resx=resx, resy=resy
     )
     # print(np.diff(x), np.diff(y))
-    print("sum", fractal.var())
     out_to_image_cmap(fractal, cmap=cmap)
     if plot:
         plot_fractal(x, y, fractal, cmap)
-
-
-# def save_toimage():
-#     # global iters, fig, ax, cbar, c, COLORMAP, out, img, res_save_x, res_save_y
-#     # print(COLORMAP)
-#     # xlim = ax.get_xlim()
-#     # ylim = ax.get_ylim()
-#     # resx, resy = res_fact * res_save_x, res_fact * res_save_y
-#     # x = np.linspace(*xlim, resx)
-#     # y = np.linspace(*ylim, resy)
-#     # dy = y[1] - y[0]
-#     # xmean = (xlim[1] + xlim[0]) / 2
-#     # print(f"XMEAN: {xmean}")
-#     # x = np.linspace(xmean - dy * (resx - 1) / 2, xmean + dy * (resx - 1) / 2, resx)
-#     # print(x)
-#     # print(y)
-#     # out = method(x, y, c, iters)
-#     out = np.flip(out, axis=1)
-#     out = out / np.max(out)
-#     out = np.log10(out.T)
-#     out[out == -np.inf] = 0
-#     print(out.min(), out.max())
-#     out = (out - out.min()) / (np.max(out) - np.min(out))
-#     out = COLORMAP(out)
-#     print(out.min(), out.max())
-#     out = np.uint8(255 * out)
-#     print(f"SHAPE: {out.shape}")
-#     print(out.min(), out.max())
-#     # fact = 255
-#     # out = (255 / fact) * (fact * (out - out.min()) / (out.max() - out.min()))
-#     img = Image.fromarray((out[:, :, :3]))
-#     # img = Image.fromarray(out, 'L')
-#     img.save("../tmp.png")
