@@ -81,7 +81,7 @@ def random_fractal(
     plot=False,
     impath=IMG_PATH,
 ):
-    for i in range(100):
+    for i in range(500):
         x0, y0 = np.random.rand(2)
         pixelwidth = 10 ** (-4 - 6 * np.random.rand())
         c = 2 * ((0.5 - np.random.rand()) + 1j * (0.5 - np.random.rand()))
