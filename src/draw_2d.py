@@ -1,9 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from . import mandelbrot_f as mb
-from time import thread_time_ns
 from PIL import Image
-import cv2
 
 COLORMAP = plt.get_cmap("magma")
 
@@ -109,6 +107,7 @@ if __name__ == "__main__":
     mb.fractals.pow = 2.0
     mb.fractals.fac = 0.5
     method = mb.fractals.mandelbrot_new
+    # method = mb.fractals.julia
 
     mult = 4
     res = 500
@@ -119,6 +118,7 @@ if __name__ == "__main__":
     c = 0.3 - 0.443j  # Extremadamente denso
     c = 0.3 - 0.44j  #
     c = 0.234 - 0.63j
+    c = (0.34849278179090426+0.02295392259871587j) # Muy bonito en Julia
     # c = 0+0j
 
     plot_interactive()
