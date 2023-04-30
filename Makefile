@@ -3,7 +3,7 @@ SRC = ./src
 BLD = ./bld
 PRF = ./prf
 
-NAME = mandelbrot
+NAME = mandelbrot_f
 
 .PHONY : build draw_2d
 

@@ -3,3 +3,8 @@ bin/
 out/
 bld/
 draw/
+
+__pycache__/
+
+*.png
+*.so

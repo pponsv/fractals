@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import mandelbrot as mb
+from . import mandelbrot_f as mb
 from time import thread_time_ns
 
 res = 300

@@ -1,9 +1,11 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import mandelbrot as mb
+from . import mandelbrot_f as mb
 from time import thread_time_ns
 from PIL import Image
 import cv2
+
+COLORMAP = plt.get_cmap("magma")
 
 
 def get_ax_size(ax):
@@ -29,7 +31,7 @@ def update(fig, ax, cbar):
     out = out / np.max(out)
     print(x.shape, y.shape, out.shape)
     ax.clear()
-    maps = ax.pcolorfast(x + x0, y + y0, np.log10(out.T), cmap=cmap)
+    maps = ax.pcolorfast(x + x0, y + y0, np.log10(out.T), cmap=COLORMAP)
     cbar.update_normal(maps)
     fig.canvas.draw()
 
@@ -39,14 +41,14 @@ def on_press(event):
 
 
 def plot_interactive():
-    global fig, ax, cbar, c, cmap, iters
+    global fig, ax, cbar, c, COLORMAP, iters
     x = np.linspace(-1.5, 1.5, 2560)
     y = np.linspace(-1.5, 1.5, 1620)
     out = method(x, y, c, iters)
     fig, ax = plt.subplots(1, 1)
     # cmap = plt.get_cmap('gray')
-    cmap = plt.get_cmap("plasma")
-    maps = ax.pcolorfast(x, y, np.log10(out.T), cmap=cmap)
+    # COLORMAP = plt.get_cmap("plasma")
+    maps = ax.pcolorfast(x, y, np.log10(out.T), cmap=COLORMAP)
     cbar = fig.colorbar(maps)
     ax.axis("equal")
     fig.canvas.mpl_connect("button_release_event", on_press)
@@ -60,23 +62,36 @@ def enter_press(event):
 
 
 def save_toimage():
-    global iters, fig, ax, cbar, c, cmap, out, img, res_save_x, res_save_y
+    global iters, fig, ax, cbar, c, COLORMAP, out, img, res_save_x, res_save_y
+    print(COLORMAP)
     xlim = ax.get_xlim()
     ylim = ax.get_ylim()
     resx, resy = res_fact * res_save_x, res_fact * res_save_y
     # x = np.linspace(*xlim, resx)
     y = np.linspace(*ylim, resy)
     dy = y[1] - y[0]
-    x = np.linspace(-dy * (resx - 1) / 2, dy * (resx - 1) / 2, resx)
-    out = np.log(method(x, y, c, iters).T + 1)
-    print(out.max(), out.min())
-    fact = 255
-    out = (255 / fact) * (fact * (out - out.min()) / (out.max() - out.min()))
-    print(out.dtype)
-    print(out.max(), out.min())
-    img = Image.fromarray(out.astype(np.uint8), "L")
+    xmean = (xlim[1] + xlim[0]) / 2
+    print(f"XMEAN: {xmean}")
+    x = np.linspace(xmean - dy * (resx - 1) / 2, xmean + dy * (resx - 1) / 2, resx)
+    print(x)
+    print(y)
+    out = method(x, y, c, iters)
+    out = np.flip(out, axis=1)
+    out = out / np.max(out)
+    out = np.log10(out.T)
+    out[out == -np.inf] = 0
+    print(out.min(), out.max())
+    out = (out - out.min()) / (np.max(out) - np.min(out))
+    out = COLORMAP(out)
+    print(out.min(), out.max())
+    out = np.uint8(255 * out)
+    print(f"SHAPE: {out.shape}")
+    print(out.min(), out.max())
+    # fact = 255
+    # out = (255 / fact) * (fact * (out - out.min()) / (out.max() - out.min()))
+    img = Image.fromarray((out[:, :, :3]))
     # img = Image.fromarray(out, 'L')
-    img.save("tmp.png")
+    img.save("../tmp.png")
     # plt.figure()
     # plt.imshow(img, cmap='gray')
     # plt.show()
@@ -90,43 +105,43 @@ def save_toimage():
 
 # method = mb.julia
 
-mb.fractals.pow = 2.0
-mb.fractals.fac = 0.5
-method = mb.fractals.mandelbrot_new
+if __name__ == "__main__":
+    mb.fractals.pow = 2.0
+    mb.fractals.fac = 0.5
+    method = mb.fractals.mandelbrot_new
 
-mult = 4
-res = 500
-res_save_x, res_save_y = 3440, 1440
-res_fact = 2
-black_and_white = False
-iters = 1000
-c = 0.3 - 0.443j  # Extremadamente denso
-c = 0.3 - 0.44j  #
-c = 0.234 - 0.63j
-# c = 0+0j
+    mult = 4
+    res = 500
+    res_save_x, res_save_y = 3440, 1440
+    res_fact = 2
+    black_and_white = False
+    iters = 1000
+    c = 0.3 - 0.443j  # Extremadamente denso
+    c = 0.3 - 0.44j  #
+    c = 0.234 - 0.63j
+    # c = 0+0j
 
-plot_interactive()
-print(img)
-# plot_toimage()
-# cmap = plt.get_cmap('gray')
+    plot_interactive()
+    print(img)
+    # plot_toimage()
+    # cmap = plt.get_cmap('gray')
 
-# resx, resy = 2560, 1620
+    # resx, resy = 2560, 1620
 
-# iters = 1000
+    # iters = 1000
 
-# x = np.linspace(-1.5, 1.5, resx)
-# y = np.linspace(-1.5, 1.5, resy)
+    # x = np.linspace(-1.5, 1.5, resx)
+    # y = np.linspace(-1.5, 1.5, resy)
 
-# c = 0.22j - 1
+    # c = 0.22j - 1
 
-# t0 = thread_time_ns()
-# out = method(x, y, c, iters)
-# print(1e-9*(thread_time_ns()-t0))
+    # t0 = thread_time_ns()
+    # out = method(x, y, c, iters)
+    # print(1e-9*(thread_time_ns()-t0))
 
-# fig, ax = plt.subplots(1,1)
-# maps = ax.pcolorfast(x, y, np.log10(out.T), cmap=cmap)
-# cbar = fig.colorbar(maps)
-# ax.axis('equal')
+    # fig, ax = plt.subplots(1,1)
+    # maps = ax.pcolorfast(x, y, np.log10(out.T), cmap=cmap)
+    # cbar = fig.colorbar(maps)
+    # ax.axis('equal')
 
-
-plt.show()
+    plt.show()
