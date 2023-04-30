@@ -106,7 +106,7 @@ def save_toimage():
 if __name__ == "__main__":
     mb.fractals.pow = 2.0
     mb.fractals.fac = 0.5
-    method = mb.fractals.mandelbrot_new
+    method = mb.fractals.mandelbrot_fractional
     # method = mb.fractals.julia
 
     mult = 4

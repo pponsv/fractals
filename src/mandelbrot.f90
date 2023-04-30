@@ -38,7 +38,7 @@ contains
 
    end subroutine julia
 
-   subroutine mandelbrot_new(x, nx, y, ny, c, max_iter, out)
+   subroutine mandelbrot_fractional(x, nx, y, ny, c, max_iter, out)
 
       implicit none
 
@@ -69,7 +69,7 @@ contains
       end do
       !$OMP END PARALLEL DO
 
-   end subroutine mandelbrot_new
+   end subroutine mandelbrot_fractional
 
    subroutine mandelbrot(x, nx, y, ny, c, max_iter, out)
 

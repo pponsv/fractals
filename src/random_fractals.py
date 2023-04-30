@@ -58,26 +58,33 @@ def random_julia_far(resx=3440, resy=1440, max_iter=1000, cmap="gray"):
     out_to_image_cmap(fractal, cmap=cmap)
 
 
-def make_julia_r0(c, max_iter, x0, y0, pixelwidth, resx=500, resy=500):
+def make_fractal_r0(
+    c, max_iter, x0, y0, pixelwidth, method=mb.fractals.julia, resx=500, resy=500
+):
     x = np.linspace(
         x0 - pixelwidth * (resx - 1) / 2, x0 + pixelwidth * (resx - 1) / 2, resx
     )
     y = np.linspace(
         y0 - pixelwidth * (resy - 1) / 2, y0 + pixelwidth * (resy - 1) / 2, resy
     )
-    fractal = mb.fractals.julia(x, y, c, max_iter)
+    fractal = method(x, y, c, max_iter)
     return fractal, x, y
 
 
-def random_julia(
-    resx=3440, resy=1440, max_iter=1000, cmap="plasma", minvar=10, plot=False
+def random_fractal(
+    method=mb.fractals.julia,
+    resx=3440,
+    resy=1440,
+    max_iter=1000,
+    cmap="plasma",
+    minvar=10,
+    plot=False,
 ):
-    var = 0
     for i in range(100):
         x0, y0 = np.random.rand(2)
-        pixelwidth = 10 ** (-3 - 6 * np.random.rand())
+        pixelwidth = 10 ** (-4 - 6 * np.random.rand())
         c = 2 * ((0.5 - np.random.rand()) + 1j * (0.5 - np.random.rand()))
-        fractal, *_ = make_julia_r0(
+        fractal, *_ = make_fractal_r0(
             c,
             max_iter=100,
             x0=x0,
@@ -85,13 +92,14 @@ def random_julia(
             pixelwidth=pixelwidth * 4,
             resx=int(resx / 4),
             resy=int(resy / 4),
+            method=method,
         )
         fractal = np.ma.masked_where(fractal == 0, fractal)
-        if fractal.var() > minvar:
-            print(i, fractal.var())
+        if fractal.std() > minvar:
+            print(i, fractal.std())
             break
-    fractal, x, y = make_julia_r0(
-        c, max_iter=max_iter, x0=x0, y0=y0, pixelwidth=pixelwidth, resx=resx, resy=resy
+    fractal, x, y = make_fractal_r0(
+        c, max_iter=max_iter, x0=x0, y0=y0, pixelwidth=pixelwidth, resx=resx, resy=resy, method=method
     )
     # print(np.diff(x), np.diff(y))
     out_to_image_cmap(fractal, cmap=cmap)
