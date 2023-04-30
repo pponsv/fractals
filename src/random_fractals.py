@@ -79,6 +79,7 @@ def random_fractal(
     cmap="plasma",
     minvar=10,
     plot=False,
+    impath=IMG_PATH,
 ):
     for i in range(100):
         x0, y0 = np.random.rand(2)
@@ -99,9 +100,16 @@ def random_fractal(
             print(i, fractal.std())
             break
     fractal, x, y = make_fractal_r0(
-        c, max_iter=max_iter, x0=x0, y0=y0, pixelwidth=pixelwidth, resx=resx, resy=resy, method=method
+        c,
+        max_iter=max_iter,
+        x0=x0,
+        y0=y0,
+        pixelwidth=pixelwidth,
+        resx=resx,
+        resy=resy,
+        method=method,
     )
     # print(np.diff(x), np.diff(y))
-    out_to_image_cmap(fractal, cmap=cmap)
+    out_to_image_cmap(fractal, cmap=cmap, impath=impath)
     if plot:
         plot_fractal(x, y, fractal, cmap)
