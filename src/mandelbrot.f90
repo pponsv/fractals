@@ -48,13 +48,11 @@ contains
       integer(8), dimension(nx, ny), intent(out) :: out
       complex(8), intent(in) :: c
 
-      integer(8) :: i, j, k
-      complex(8) :: z, w
-
+      integer(8) :: i, j
       ! print *, pow, fac
 
       out = 0
-      !$OMP PARALLEL DO PRIVATE(i, j, k, z)
+      !$OMP PARALLEL DO PRIVATE(i, j)
       do j = 1, ny
          do i = 1, nx
             call mandelbrot_single_powfac(x(i), y(j), c, max_iter, pow, fac, out(i, j))
@@ -83,11 +81,9 @@ contains
       integer(8), dimension(nx, ny), intent(out) :: out
       complex(8), intent(in) :: c
 
-      integer(8) :: i, j, k
-      complex(8) :: z, w
-
+      integer(8) :: i, j
       out = 0
-      !$OMP PARALLEL DO PRIVATE(i, j, k, z)
+      !$OMP PARALLEL DO PRIVATE(i, j)
       do j = 1, ny
          do i = 1, nx
             call mandelbrot_single(x(i), y(j), c, max_iter, out(i, j))
