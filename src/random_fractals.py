@@ -90,9 +90,9 @@ def random_fractal(
             max_iter=100,
             x0=x0,
             y0=y0,
-            pixelwidth=pixelwidth * 2,
+            pixelwidth=pixelwidth,
             resx=500,
-            resy=400,
+            resy=300,
             method=method,
         )
         fractal = np.ma.masked_where(fractal == 0, fractal)
@@ -108,7 +108,7 @@ def random_fractal(
                 resy=resy,
                 method=method,
             )
-    # print(np.diff(x), np.diff(y))
             out_to_image_cmap(fractal, cmap=cmap, impath=impath)
             if plot:
                 plot_fractal(x, y, fractal, cmap)
+            break
