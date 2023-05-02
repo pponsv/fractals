@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from . import mandelbrot_f as mb
+from . import mandelbrot_f as mb_f
 from PIL import Image
 
 COLORMAP = plt.get_cmap("magma")
@@ -104,9 +104,9 @@ def save_toimage():
 # method = mb.julia
 
 if __name__ == "__main__":
-    mb.fractals.pow = 2.0
-    mb.fractals.fac = 0.5
-    method = mb.fractals.mandelbrot_fractional
+    mb_f.fractals.pow = 2.0
+    mb_f.fractals.fac = 0.5
+    method = mb_f.fractals.mandelbrot_fractional
     # method = mb.fractals.julia
 
     mult = 4

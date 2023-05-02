@@ -2,8 +2,8 @@ module fractals
 
    implicit none
 
-   integer(8) :: pow = 2
-   real(8) :: fac = 0.5
+   ! integer(8) :: pow = 2
+   ! real(8) :: fac = 0.5
 
 contains
 
@@ -38,24 +38,26 @@ contains
 
    end subroutine julia
 
-   subroutine mandelbrot_fractional(x, nx, y, ny, c, max_iter, out)
+   subroutine mandelbrot_fractional(x, nx, y, ny, c, max_iter, pow, fac, out)
 
       implicit none
 
       integer(8), intent(in) :: max_iter
-      integer(8), intent(in) :: nx, ny
-      real(8), intent(in) :: x(nx), y(ny)
+      integer(8), intent(in) :: nx, ny, pow
+      real(8), intent(in) :: x(nx), y(ny), fac
       integer(8), dimension(nx, ny), intent(out) :: out
       complex(8), intent(in) :: c
 
       integer(8) :: i, j, k
       complex(8) :: z, w
 
+      ! print *, pow, fac
+
       out = 0
       !$OMP PARALLEL DO PRIVATE(i, j, k, z)
       do j = 1, ny
          do i = 1, nx
-            call mandelbrot_single_powfac(x(i), y(j), c, max_iter, out(i, j))
+            call mandelbrot_single_powfac(x(i), y(j), c, max_iter, pow, fac, out(i, j))
             ! z = cmplx(x(i), y(j), kind=8)
             ! w = c
             ! do k = 1, max_iter
@@ -158,9 +160,9 @@ contains
 
    end subroutine fractal_4d
 
-   subroutine mandelbrot_single_powfac(x, y, c, max_iter, out)
-      real(8), intent(in) :: x, y
-      integer(8), intent(in) :: max_iter
+   subroutine mandelbrot_single_powfac(x, y, c, max_iter, pow, fac, out)
+      real(8), intent(in) :: x, y, fac
+      integer(8), intent(in) :: max_iter, pow
       complex(8), intent(in) :: c
       integer(8), intent(inout) :: out
       complex(8) :: z, w

@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from . import mandelbrot_f as mb
+from . import mandelbrot_f as mb_f
 from time import thread_time_ns
 
 if __name__=='__main__':
@@ -14,7 +14,7 @@ if __name__=='__main__':
     c = (-0.218, -0.113, -0.181, -0.496)
 
     t0 = thread_time_ns()
-    out = mb.fractals.fractal_4d(x, y, z, w, c, iters)
+    out = mb_f.fractals.fractal_4d(x, y, z, w, c, iters)
     print(1e-9 * (thread_time_ns() - t0))
 
     print(out.shape)

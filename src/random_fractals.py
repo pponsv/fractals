@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from . import mandelbrot_f as mb
+from . import mandelbrot_f as mb_f
 from matplotlib.colors import Normalize
 
 # from .draw_2d import COLORMAP
@@ -54,12 +54,21 @@ def random_julia_far(resx=3440, resy=1440, max_iter=1000, cmap="gray", impath=IM
     y = np.linspace(*ylim, resy)
     dy = y[1] - y[0]
     x = np.linspace(-dy * (resx - 1) / 2, dy * (resx - 1) / 2, resx)
-    fractal = mb.fractals.julia(x, y, c, max_iter)
+    fractal = mb_f.fractals.julia(x, y, c, max_iter)
     out_to_image_cmap(fractal, cmap=cmap, impath=impath)
 
 
 def make_fractal_r0(
-    c, max_iter, x0, y0, pixelwidth, method=mb.fractals.julia, resx=500, resy=500
+    c,
+    max_iter,
+    x0,
+    y0,
+    pixelwidth,
+    method=mb_f.fractals.julia,
+    resx=500,
+    resy=500,
+    pow=2,
+    fac=0.5,
 ):
     x = np.linspace(
         x0 - pixelwidth * (resx - 1) / 2, x0 + pixelwidth * (resx - 1) / 2, resx
@@ -67,12 +76,15 @@ def make_fractal_r0(
     y = np.linspace(
         y0 - pixelwidth * (resy - 1) / 2, y0 + pixelwidth * (resy - 1) / 2, resy
     )
-    fractal = method(x, y, c, max_iter)
+    if method == mb_f.fractals.mandelbrot_fractional:
+        fractal = method(x, y, c, max_iter, pow, fac)
+    else:
+        fractal = method(x, y, c, max_iter)
     return fractal, x, y
 
 
 def random_fractal(
-    method=mb.fractals.julia,
+    method=mb_f.fractals.julia,
     resx=3440,
     resy=1440,
     max_iter=1000,
@@ -80,6 +92,8 @@ def random_fractal(
     minvar=10,
     plot=False,
     impath=IMG_PATH,
+    pow=2,
+    fac=0.5,
 ):
     for i in range(500):
         x0, y0 = np.random.rand(2)
@@ -94,6 +108,8 @@ def random_fractal(
             resx=500,
             resy=300,
             method=method,
+            pow=pow,
+            fac=fac,
         )
         fractal = np.ma.masked_where(fractal == 0, fractal)
         if fractal.std() > minvar:
@@ -107,8 +123,11 @@ def random_fractal(
                 resx=resx,
                 resy=resy,
                 method=method,
+                pow=pow,
+                fac=fac,
             )
             out_to_image_cmap(fractal, cmap=cmap, impath=impath)
             if plot:
                 plot_fractal(x, y, fractal, cmap)
-            break
+            return
+    print("Failed")
