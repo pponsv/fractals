@@ -47,7 +47,7 @@ def out_to_image_cmap(out, cmap="plasma", impath=IMG_PATH):
     img.save(impath)
 
 
-def random_julia_far(resx=3440, resy=1440, max_iter=1000, cmap="gray"):
+def random_julia_far(resx=3440, resy=1440, max_iter=1000, cmap="gray", impath=IMG_PATH):
     c = 2 * ((0.5 - np.random.rand()) + 1j * (0.5 - np.random.rand()))
     print(c)
     ylim = -2, 2
@@ -55,7 +55,7 @@ def random_julia_far(resx=3440, resy=1440, max_iter=1000, cmap="gray"):
     dy = y[1] - y[0]
     x = np.linspace(-dy * (resx - 1) / 2, dy * (resx - 1) / 2, resx)
     fractal = mb.fractals.julia(x, y, c, max_iter)
-    out_to_image_cmap(fractal, cmap=cmap)
+    out_to_image_cmap(fractal, cmap=cmap, impath=impath)
 
 
 def make_fractal_r0(
@@ -90,9 +90,9 @@ def random_fractal(
             max_iter=100,
             x0=x0,
             y0=y0,
-            pixelwidth=pixelwidth * 4,
-            resx=int(resx / 4),
-            resy=int(resy / 4),
+            pixelwidth=pixelwidth * 2,
+            resx=500,
+            resy=400,
             method=method,
         )
         fractal = np.ma.masked_where(fractal == 0, fractal)
