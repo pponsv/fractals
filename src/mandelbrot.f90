@@ -21,17 +21,10 @@ contains
       complex(8) :: z
 
       out = 0
-      !$OMP PARALLEL DO PRIVATE(i, j, k, z)
+      !$OMP PARALLEL DO PRIVATE(i, j)
       do j = 1, ny
          do i = 1, nx
-            z = cmplx(x(i), y(j), kind=8)
-            do k = 1, max_iter
-               z = z**2 + c
-               if (abs(z) > 2) then
-                  out(i, j) = k
-                  exit
-               end if
-            end do
+            call julia_single(x(i), y(j), c, max_iter, out(i, j))
          end do
       end do
       !$OMP END PARALLEL DO
@@ -56,15 +49,6 @@ contains
       do j = 1, ny
          do i = 1, nx
             call mandelbrot_single_powfac(x(i), y(j), c, max_iter, pow, fac, out(i, j))
-            ! z = cmplx(x(i), y(j), kind=8)
-            ! w = c
-            ! do k = 1, max_iter
-            !    w = w**pow + fac*z ! Sale chulo
-            !    if (abs(w) > 2) then
-            !       out(i, j) = k
-            !       exit
-            !    end if
-            ! end do
          end do
       end do
       !$OMP END PARALLEL DO
@@ -87,15 +71,6 @@ contains
       do j = 1, ny
          do i = 1, nx
             call mandelbrot_single(x(i), y(j), c, max_iter, out(i, j))
-            ! z = cmplx(x(i), y(j), kind=8)
-            ! w = c
-            ! do k = 1, max_iter
-            !    w = w**2 + z
-            !    if (abs(w) > 2) then
-            !       out(i, j) = k
-            !       exit
-            !    end if
-            ! end do
          end do
       end do
       !$OMP END PARALLEL DO
@@ -193,5 +168,24 @@ contains
          end if
       end do
    end subroutine mandelbrot_single
+
+   subroutine julia_single(x, y, c, max_iter, out)
+      real(8), intent(in) :: x, y
+      integer(8), intent(in) :: max_iter
+      complex(8), intent(in) :: c
+      integer(8), intent(inout) :: out
+      complex(8) :: z
+      integer(8) :: k
+
+      z = cmplx(x, y, kind=8)
+      do k = 1, max_iter
+         z = z**2 + c
+         if (abs(z) > 2) then
+            out = k
+            exit
+         end if
+      end do
+
+   end subroutine julia_single
 
 end module fractals
