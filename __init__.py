@@ -1,2 +1,3 @@
 from .src import draw_2d, draw_3d, random_fractals
-from .src import mandelbrot_f as mb_f
+from .src.mandelbrot_f import fractals as mb_f
+from . import make_fractal_wallpaper

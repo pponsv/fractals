@@ -1,0 +1,1 @@
+from .mandelbrot_f import fractals

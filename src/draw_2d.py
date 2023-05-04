@@ -1,12 +1,18 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from . import mandelbrot_f as mb_f
+
+# import mandelbrot_f as mb_f
+from ..src import fractals
 from PIL import Image
 
-COLORMAP = plt.get_cmap("magma")
+
+def get_cmap(name="plasma"):
+    cmap = plt.get_cmap(name)
+    cmap.set_bad([1.0, 1.0, 1.0, 1.0])
+    return cmap
 
 
-def get_ax_size(ax):
+def get_ax_size(fig, ax):
     bbox = ax.get_window_extent().transformed(fig.dpi_scale_trans.inverted())
     width, height = bbox.width, bbox.height
     width *= fig.dpi
@@ -14,134 +20,131 @@ def get_ax_size(ax):
     return width, height
 
 
-def update(fig, ax, cbar):
-    # global cbar
-    xlim = ax.get_xlim()
-    x0 = xlim[0]
-    xlim = xlim - x0
-    ylim = ax.get_ylim()
-    y0 = ylim[0]
-    ylim = ylim - y0
-    xr, yr = get_ax_size(ax)
-    x = np.linspace(*xlim, int(xr), dtype=np.float64)
-    y = np.linspace(*ylim, int(yr), dtype=np.float64)
-    out = method(x + x0, y + y0, c, iters)
-    out = out / np.max(out)
-    print(x.shape, y.shape, out.shape)
-    ax.clear()
-    maps = ax.pcolorfast(x + x0, y + y0, np.log10(out.T), cmap=COLORMAP)
-    cbar.update_normal(maps)
-    fig.canvas.draw()
-
-
-def on_press(event):
-    update(fig, ax, cbar)
-
-
-def plot_interactive():
-    global fig, ax, cbar, c, COLORMAP, iters
-    x = np.linspace(-1.5, 1.5, 2560)
-    y = np.linspace(-1.5, 1.5, 1620)
-    out = method(x, y, c, iters)
-    fig, ax = plt.subplots(1, 1)
-    # cmap = plt.get_cmap('gray')
-    # COLORMAP = plt.get_cmap("plasma")
-    maps = ax.pcolorfast(x, y, np.log10(out.T), cmap=COLORMAP)
-    cbar = fig.colorbar(maps)
-    ax.axis("equal")
-    fig.canvas.mpl_connect("button_release_event", on_press)
-    fig.canvas.mpl_connect("key_press_event", enter_press)
-    plt.show()
-
-
-def enter_press(event):
-    if event.key == "enter":
-        save_toimage()
-
-
-def save_toimage():
-    global iters, fig, ax, cbar, c, COLORMAP, out, img, res_save_x, res_save_y
-    print(COLORMAP)
+def get_x0_y0(ax):
     xlim = ax.get_xlim()
     ylim = ax.get_ylim()
-    resx, resy = res_fact * res_save_x, res_fact * res_save_y
-    # x = np.linspace(*xlim, resx)
-    y = np.linspace(*ylim, resy)
-    dy = y[1] - y[0]
-    xmean = (xlim[1] + xlim[0]) / 2
-    print(f"XMEAN: {xmean}")
-    x = np.linspace(xmean - dy * (resx - 1) / 2, xmean + dy * (resx - 1) / 2, resx)
-    print(x)
-    print(y)
-    out = method(x, y, c, iters)
-    out = np.flip(out, axis=1)
-    out = out / np.max(out)
-    out = np.log10(out.T)
-    out[out == -np.inf] = 0
-    print(out.min(), out.max())
-    out = (out - out.min()) / (np.max(out) - np.min(out))
-    out = COLORMAP(out)
-    print(out.min(), out.max())
-    out = np.uint8(255 * out)
-    print(f"SHAPE: {out.shape}")
-    print(out.min(), out.max())
-    # fact = 255
-    # out = (255 / fact) * (fact * (out - out.min()) / (out.max() - out.min()))
-    img = Image.fromarray((out[:, :, :3]))
-    # img = Image.fromarray(out, 'L')
-    img.save("../tmp.png")
-    # plt.figure()
-    # plt.imshow(img, cmap='gray')
-    # plt.show()
-    # print('done')
-    # fig, ax = plt.subplots(1,1)
-    # cmap = plt.get_cmap('gray')
-    # maps = ax.pcolorfast(x, y, np.log10(out.T), cmap=cmap)
-    # ax.axis('equal')
-    # plt.show()
+    return (xlim[0] + xlim[1]) / 2, (ylim[0] + ylim[1]) / 2
 
 
-# method = mb.julia
+def get_pixelsize(fig, ax):
+    width, height = get_ax_size(fig, ax)
+    xlim = ax.get_xlim()
+    return np.diff(xlim) / width
 
-if __name__ == "__main__":
-    mb_f.fractals.pow = 2.0
-    mb_f.fractals.fac = 0.5
-    method = mb_f.fractals.mandelbrot_fractional
-    # method = mb.fractals.julia
 
-    mult = 4
-    res = 500
-    res_save_x, res_save_y = 3440, 1440
-    res_fact = 2
-    black_and_white = False
-    iters = 1000
-    c = 0.3 - 0.443j  # Extremadamente denso
-    c = 0.3 - 0.44j  #
-    c = 0.234 - 0.63j
-    c = (0.34849278179090426+0.02295392259871587j) # Muy bonito en Julia
-    # c = 0+0j
+def rand_complex(shape=1):
+    return np.sqrt(np.random.uniform(0, 1, shape)) * np.exp(
+        1.0j * np.random.uniform(0, 2 * np.pi, shape)
+    )
 
-    plot_interactive()
-    print(img)
-    # plot_toimage()
-    # cmap = plt.get_cmap('gray')
 
-    # resx, resy = 2560, 1620
+class FractalPlot:
+    def __init__(
+        self,
+        method,
+        c=rand_complex(),
+        max_iter=1000,
+        colormap="plasma",
+        resx=2000,
+        resy=2000,
+        impath="./mandelbrot.png",
+    ) -> None:
+        self.method = method
+        self.x = np.linspace(-1.5, 1.5, 2000)
+        self.y = np.linspace(-1.5, 1.5, 2000)
+        self.c = c
+        self.max_iter = max_iter
+        self.resx, self.resy = resx, resy
+        self.impath = impath
+        self.cmap = get_cmap(colormap)
 
-    # iters = 1000
+    def recalculate(self):
+        self.out = self.method(self.x, self.y, self.c, self.max_iter).T
 
-    # x = np.linspace(-1.5, 1.5, resx)
-    # y = np.linspace(-1.5, 1.5, resy)
+    def replot(self):
+        self.ax.clear()
+        maps = self.ax.pcolorfast(self.x, self.y, np.log10(self.out), cmap=self.cmap)
+        self.cbar.update_normal(maps)
 
-    # c = 0.22j - 1
+    def init_plot_interactive(self) -> None:
+        self.recalculate()
+        self.fig, self.ax = plt.subplots(1, 1, figsize=(9, 7))
+        self.ax.axis("equal")
+        self.fig.canvas.mpl_connect("key_press_event", self.enter_press)
+        self.fig.canvas.mpl_connect("button_release_event", self.on_button_press)
+        maps = self.ax.pcolorfast(self.x, self.y, np.log10(self.out), cmap=self.cmap)
+        self.cbar = self.fig.colorbar(maps)
 
-    # t0 = thread_time_ns()
-    # out = method(x, y, c, iters)
-    # print(1e-9*(thread_time_ns()-t0))
+    def redraw_centered(self):
+        x0, y0 = get_x0_y0(self.ax)
+        ylim = self.ax.get_ylim()
+        pixelwidth = (ylim[1] - ylim[0]) / self.resy
+        self.x = np.linspace(
+            x0 - pixelwidth * (self.resx - 1) / 2,
+            x0 + pixelwidth * (self.resx - 1) / 2,
+            self.resx,
+        )
+        self.y = np.linspace(
+            y0 - pixelwidth * (self.resy - 1) / 2,
+            y0 + pixelwidth * (self.resy - 1) / 2,
+            self.resy,
+        )
+        self.recalculate()
+        print(self.x, self.y, "\n", x0, y0, pixelwidth)
+        # self.save_toimage()
 
-    # fig, ax = plt.subplots(1,1)
-    # maps = ax.pcolorfast(x, y, np.log10(out.T), cmap=cmap)
-    # cbar = fig.colorbar(maps)
-    # ax.axis('equal')
+    def save_toimage(self):
+        print("TODO - SAVE IMAGE")
+        out = np.flip(self.out.T, axis=1)
+        # out = self.out.T
+        out = np.ma.masked_where(out == 0, out)
+        out = np.log10(out.T)
+        out = (out - np.min(out)) / (np.max(out) - np.min(out))
+        out = np.uint8(255 * self.cmap(out))
+        img = Image.fromarray((out))
+        img.save(self.impath)
 
-    plt.show()
+    def update_canvas(self):
+        xr, yr = get_ax_size(self.fig, self.ax)
+        self.x = np.linspace(*self.ax.get_xlim(), int(xr))
+        self.y = np.linspace(*self.ax.get_ylim(), int(yr))
+        self.recalculate()
+        self.replot()
+
+    def on_button_press(self, event):
+        self.update_canvas()
+
+    def enter_press(self, event):
+        if event.key == "enter":
+            self.redraw_centered()
+            self.save_toimage()
+            x0, y0 = get_x0_y0(self.ax)
+            print(x0, y0)
+        elif event.key == "h":
+            self.update_canvas()
+
+
+class JuliaPlot(FractalPlot):
+    def __init__(self, *args, **kwargs):
+        super().__init__(self, *args, **kwargs)
+        self.method = fractals.julia
+        # self.c = c
+
+
+class MandelbrotPlot(FractalPlot):
+    def __init__(self, *args, **kwargs):
+        super().__init__(self, *args, **kwargs)
+        self.method = fractals.mandelbrot
+
+
+class FractionalMandelbrotPlot(FractalPlot):
+    def __init__(self, *args, pow=4, fac=0.63, **kwargs):
+        super().__init__(self, *args, **kwargs)
+        self.method = fractals.mandelbrot_fractional
+        self.pow = pow
+        self.fac = fac
+
+    def recalculate(self):
+        self.out = self.method(
+            self.x, self.y, self.c, self.max_iter, self.pow, self.fac
+        ).T

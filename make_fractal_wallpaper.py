@@ -10,8 +10,8 @@ IMPATH = f"{DIRPATH}/../mandelbrot.png"
 sys.path.append(DIRPATH)
 
 
-def main(resx=3440, resy=1440, plot=False):
-    pow, fac = 2, 0.5
+def main(resx=3440, resy=1440, plot=False, impath=IMPATH):
+    pow, fac = 5, 0.5
     # mb.random_fractals.random_julia_bw_far()
     k = np.random.randint(1, 5)
     # k = 2
@@ -25,7 +25,7 @@ def main(resx=3440, resy=1440, plot=False):
             minvar=8,
             method=mb_f.random_fractals.mb_f.fractals.mandelbrot_fractional,
             max_iter=500,
-            impath=IMPATH,
+            impath=impath,
             pow=pow,
             fac=fac,
         )
@@ -39,7 +39,7 @@ def main(resx=3440, resy=1440, plot=False):
             minvar=8,
             method=mb_f.random_fractals.mb_f.fractals.julia,
             max_iter=500,
-            impath=IMPATH,
+            impath=impath,
         )
     elif k == 3:
         print("Mandelbrot")
@@ -51,11 +51,11 @@ def main(resx=3440, resy=1440, plot=False):
             minvar=8,
             method=mb_f.random_fractals.mb_f.fractals.mandelbrot,
             max_iter=500,
-            impath=IMPATH,
+            impath=impath,
         )
     elif k == 4:
         print("Julia black and white")
-        mb_f.random_fractals.random_julia_far(resx=resx, resy=resy, impath=IMPATH)
+        mb_f.random_fractals.random_julia_far(resx=resx, resy=resy, impath=impath)
     if plot:
         mb_f.random_fractals.plt.show()
 
