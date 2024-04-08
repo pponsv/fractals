@@ -16,7 +16,7 @@ IMG_PATH = "/home/pedro/.config/i3/mandelbrot/tmp_wallpaper.png"
 
 def get_cmap(name="plasma"):
     COLORMAP = plt.get_cmap(name)
-    COLORMAP.set_bad([1.0, 1.0, 1.0, 1.0])
+    COLORMAP.set_bad((1.0, 1.0, 1.0, 1.0))
     return COLORMAP
 
 
@@ -42,12 +42,14 @@ def out_to_image_cmap(out, cmap="plasma", impath=IMG_PATH):
     out = np.ma.masked_where(out == 0, out)
     out = np.log10(out.T)
     out = (out - np.min(out)) / (np.max(out) - np.min(out))
-    out = np.uint8(255 * COLORMAP(out))
+    out = (255 * COLORMAP(out)).astype(np.uint8)
     img = Image.fromarray((out[:, :, :3]))
     img.save(impath)
 
 
-def random_julia_far(resx=3440, resy=1440, max_iter=1000, cmap="gray", impath=IMG_PATH):
+def random_julia_far(
+    resx=3440, resy=1440, max_iter=1000, cmap="gray", impath=IMG_PATH
+):
     c = 2 * ((0.5 - np.random.rand()) + 1j * (0.5 - np.random.rand()))
     print(c)
     ylim = -2, 2
@@ -71,10 +73,14 @@ def make_fractal_r0(
     fac=0.5,
 ):
     x = np.linspace(
-        x0 - pixelwidth * (resx - 1) / 2, x0 + pixelwidth * (resx - 1) / 2, resx
+        x0 - pixelwidth * (resx - 1) / 2,
+        x0 + pixelwidth * (resx - 1) / 2,
+        resx,
     )
     y = np.linspace(
-        y0 - pixelwidth * (resy - 1) / 2, y0 + pixelwidth * (resy - 1) / 2, resy
+        y0 - pixelwidth * (resy - 1) / 2,
+        y0 + pixelwidth * (resy - 1) / 2,
+        resy,
     )
     if method == mb_f.fractals.mandelbrot_fractional:
         fractal = method(x, y, c, max_iter, pow, fac)

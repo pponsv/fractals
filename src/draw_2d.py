@@ -1,14 +1,13 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-# import mandelbrot_f as mb_f
-from ..src import fractals
+from . import mandelbrot_f as mb_f
 from PIL import Image
 
 
 def get_cmap(name="plasma"):
     cmap = plt.get_cmap(name)
-    cmap.set_bad([1.0, 1.0, 1.0, 1.0])
+    cmap.set_bad((1.0, 1.0, 1.0, 1.0))
     return cmap
 
 
@@ -63,7 +62,9 @@ class FractalPlot:
 
     def replot(self):
         self.ax.clear()
-        maps = self.ax.pcolorfast(self.x, self.y, np.log10(self.out), cmap=self.cmap)
+        maps = self.ax.pcolorfast(
+            self.x, self.y, np.log10(self.out), cmap=self.cmap
+        )
         self.cbar.update_normal(maps)
 
     def init_plot_interactive(self) -> None:
@@ -71,8 +72,12 @@ class FractalPlot:
         self.fig, self.ax = plt.subplots(1, 1, figsize=(9, 7))
         self.ax.axis("equal")
         self.fig.canvas.mpl_connect("key_press_event", self.enter_press)
-        self.fig.canvas.mpl_connect("button_release_event", self.on_button_press)
-        maps = self.ax.pcolorfast(self.x, self.y, np.log10(self.out), cmap=self.cmap)
+        self.fig.canvas.mpl_connect(
+            "button_release_event", self.on_button_press
+        )
+        maps = self.ax.pcolorfast(
+            self.x, self.y, np.log10(self.out), cmap=self.cmap
+        )
         self.cbar = self.fig.colorbar(maps)
 
     def redraw_centered(self):
@@ -106,8 +111,8 @@ class FractalPlot:
 
     def update_canvas(self):
         xr, yr = get_ax_size(self.fig, self.ax)
-        self.x = np.linspace(*self.ax.get_xlim(), int(xr))
-        self.y = np.linspace(*self.ax.get_ylim(), int(yr))
+        self.x = np.linspace(*self.ax.get_xlim(), int(xr))  # type: ignore
+        self.y = np.linspace(*self.ax.get_ylim(), int(yr))  # type: ignore
         self.recalculate()
         self.replot()
 
@@ -127,20 +132,20 @@ class FractalPlot:
 class JuliaPlot(FractalPlot):
     def __init__(self, *args, **kwargs):
         super().__init__(self, *args, **kwargs)
-        self.method = fractals.julia
+        self.method = mb_f.fractals.julia
         # self.c = c
 
 
 class MandelbrotPlot(FractalPlot):
     def __init__(self, *args, **kwargs):
         super().__init__(self, *args, **kwargs)
-        self.method = fractals.mandelbrot
+        self.method = mb_f.fractals.mandelbrot
 
 
 class FractionalMandelbrotPlot(FractalPlot):
     def __init__(self, *args, pow=4, fac=0.63, **kwargs):
         super().__init__(self, *args, **kwargs)
-        self.method = fractals.mandelbrot_fractional
+        self.method = mb_f.fractals.mandelbrot_fractional
         self.pow = pow
         self.fac = fac
 
@@ -148,3 +153,9 @@ class FractionalMandelbrotPlot(FractalPlot):
         self.out = self.method(
             self.x, self.y, self.c, self.max_iter, self.pow, self.fac
         ).T
+
+
+if __name__ == "__main__":
+    fp = FractionalMandelbrotPlot()
+    fp.init_plot_interactive()
+    plt.show()
